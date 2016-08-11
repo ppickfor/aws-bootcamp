@@ -1,6 +1,6 @@
 #!/bin/bash
 # update the system
-yum -y update
+yum update -y
 
 # install (and start) Apache and PHP
 yum install httpd php -y
@@ -8,4 +8,4 @@ chkconfig httpd on
 service httpd start
 
 # copy files from S3
-aws s3 cp s3://bootstrap.luigi.plumbing/index.html /var/www/html
+aws s3 cp s3://test-bucket.softchoice.com/ /var/www/html --recursive
