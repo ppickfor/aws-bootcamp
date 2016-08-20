@@ -9,7 +9,7 @@
       <div class="row">
         <div class="col-xs-12 text-center">
           <h1>AWS Bootcamp 2016</h1>
-          <h2>Mississauga, Ontario</h2>
+          <h2>Dallas, Texas</h2>
         </div>
       </div>
       <div class="row">
