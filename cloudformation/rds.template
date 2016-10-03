@@ -1,0 +1,111 @@
+{
+  "AWSTemplateFormatVersion":"2010-09-09",
+  "Description":"Provision RDS hosts for AWS Bootcamp",
+
+  "Parameters":{
+    "dbInstanceType":{
+      "Type":"String",
+      "Default":"db.t2.micro",
+      "AllowedValues":["db.t2.micro","db.t2.small"],
+      "Description":"DB Instance Size: Enter db.t2.micro. Default is db.t2.micro."
+    },
+    "dbMasterUserName":{
+      "Type":"String",
+      "Description":"Set the Administrator password for the RDS instance"
+    },
+    "dbMasterUserPassword":{
+      "Type":"String",
+      "NoEcho":"true",
+      "AllowedPattern":"[a-zA-Z0-9]*",
+      "Description":"Set the Administrator name for the RDS instance"
+    },
+    "dbSecurityGroupId":{
+      "Type":"AWS::EC2::SecurityGroup::Id",
+      "Description":"The Security Group ID to use with the RDS instance"
+    },
+    "departmentTag":{"Type":"String"},
+    "privateSubnet0Id":{
+      "Type":"AWS::EC2::Subnet::Id",
+      "Description":"The first private subnet for your subnet group"
+    },
+    "privateSubnet1Id":{
+      "Type":"AWS::EC2::Subnet::Id",
+      "Description":"The second private subnet for your subnet group"
+    },
+    "projectTag":{"Type":"String"},
+    "vpcID":{
+      "Type":"AWS::EC2::VPC::Id",
+      "Description":"The VPC ID where to deploy the RDS instance"
+    }
+  },
+
+  "Resources":{
+    "mySQLRDSOptionGroup57":{
+      "Type":"AWS::RDS::OptionGroup",
+      "Properties":{
+        "EngineName":"mysql",
+        "MajorEngineVersion":"5.7",
+        "OptionGroupDescription":"Option group for MySQL 5.7",
+        "OptionConfigurations":[{
+          "OptionName": "MEMCACHED",
+          "VpcSecurityGroupMemberships":[{"Ref":"dbSecurityGroupId"}]
+        }],
+        "Tags":[
+          {"Key":"Name","Value":"option-group-mysql57"},
+          {"Key":"project-code","Value":{"Ref":"projectTag"}},
+          {"Key":"department-code","Value":{"Ref":"departmentTag"}}
+        ]
+      }
+    },
+    "mySQLRDSParameterGroup57":{
+      "Type":"AWS::RDS::DBParameterGroup",
+      "Properties":{
+        "Description":"Parameter group for MySQL 5.7",
+        "Family":"MySQL5.7",
+        "Tags":[
+          {"Key":"Name","Value":"parameter-group-mysql57"},
+          {"Key":"project-code","Value":{"Ref":"projectTag"}},
+          {"Key":"department-code","Value":{"Ref":"departmentTag"}}
+        ]
+      }
+    },
+    "mySQLRDSSubnetGroup57":{
+      "Type":"AWS::RDS::DBSubnetGroup",
+      "Properties":{
+        "DBSubnetGroupDescription":"Subnet group for MySQL",
+        "SubnetIds":[{"Ref":"privateSubnet1Id"},{"Ref":"privateSubnet0Id"}],
+        "Tags":[
+          {"Key":"Name","Value":"subnet-group-mysql57"},
+          {"Key":"project-code","Value":{"Ref":"projectTag"}},
+          {"Key":"department-code","Value":{"Ref":"departmentTag"}}
+        ]
+      }
+    },
+    "mySQLRDSInstance":{
+      "Type":"AWS::RDS::DBInstance",
+      "Properties":{
+        "AllocatedStorage":"10",
+        "AllowMajorVersionUpgrade":false,
+        "AutoMinorVersionUpgrade":true,
+        "BackupRetentionPeriod":"7",
+        "Engine":"MySQL",
+        "EngineVersion":"5.7.11",
+        "DBInstanceClass":{"Ref":"dbInstanceType"},
+        "DBParameterGroupName":{"Ref":"mySQLRDSParameterGroup57"},
+        "DBSubnetGroupName":{"Ref":"mySQLRDSSubnetGroup57"},
+        "VPCSecurityGroups":[{"Ref":"dbSecurityGroupId"}],
+        "MasterUsername":{"Ref":"dbMasterUserName"},
+        "MasterUserPassword":{"Ref":"dbMasterUserPassword"},
+        "MultiAZ":true,
+        "OptionGroupName":{"Ref":"mySQLRDSOptionGroup57"},
+        "PubliclyAccessible":false,
+        "StorageType":"gp2",
+        "Tags":[
+          {"Key":"Name","Value":"mysql-rds"},
+          {"Key":"project-code","Value":{"Ref":"projectTag"}},
+          {"Key":"department-code","Value":{"Ref":"departmentTag"}}
+        ]
+      }
+    }
+  }
+}
