@@ -1,0 +1,1014 @@
+ {
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "vpc239d6844": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.100.0.0/16",
+        "InstanceTenancy": "default",
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "false",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-vpc"
+          }
+        ]
+      }
+    },
+    "subnet6095be16": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.100.20.0/24",
+        "AvailabilityZone": "us-west-2b",
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-pub-2b"
+          }
+        ]
+      }
+    },
+    "subnet64908100": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.100.30.0/24",
+        "AvailabilityZone": "us-west-2a",
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-priv-2a"
+          }
+        ]
+      }
+    },
+    "subnet8f9180eb": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.100.10.0/24",
+        "AvailabilityZone": "us-west-2a",
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-pub-2a"
+          }
+        ]
+      }
+    },
+    "subnet4495be32": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.100.40.0/24",
+        "AvailabilityZone": "us-west-2b",
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-priv-2b"
+          }
+        ]
+      }
+    },
+    "subnet47908123": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.100.50.0/24",
+        "AvailabilityZone": "us-west-2a",
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-db-2a"
+          }
+        ]
+      }
+    },
+    "subnet2f95be59": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.100.60.0/24",
+        "AvailabilityZone": "us-west-2b",
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-db-2b"
+          }
+        ]
+      }
+    },
+    "igw4bf5782f": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-igw"
+          }
+        ]
+      }
+    },
+    "acl2d4f994a": {
+      "Type": "AWS::EC2::NetworkAcl",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        }
+      }
+    },
+    "rtb6614a401": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-pub"
+          }
+        ]
+      }
+    },
+    "rtb7f14a418": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-priv"
+          }
+        ]
+      }
+    },
+    "rtb7413a313": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        }
+      }
+    },
+    "elbbootcamplb": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties": {
+        "Subnets": [
+          {
+            "Ref": "subnet6095be16"
+          },
+          {
+            "Ref": "subnet8f9180eb"
+          }
+        ],
+        "HealthCheck": {
+          "HealthyThreshold": "3",
+          "Interval": "10",
+          "Target": "HTTP:80/index.php",
+          "Timeout": "5",
+          "UnhealthyThreshold": "2"
+        },
+        "ConnectionDrainingPolicy": {
+          "Enabled": "true",
+          "Timeout": "300"
+        },
+        "ConnectionSettings": {
+          "IdleTimeout": "60"
+        },
+        "CrossZone": "true",
+        "SecurityGroups": [
+          {
+            "Ref": "sgbootcamplb"
+          }
+        ],
+        "Listeners": [
+          {
+            "InstancePort": "80",
+            "LoadBalancerPort": "80",
+            "Protocol": "HTTP",
+            "InstanceProtocol": "HTTP"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-lb"
+          }
+        ]
+      }
+    },
+    "eip351622342": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "distd2itenkrivvopvcloudfrontnet": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Enabled": true,
+          "PriceClass": "PriceClass_All",
+          "DefaultCacheBehavior": {
+            "TargetOriginId": "S3-bootcamp-netremedies",
+            "ViewerProtocolPolicy": "allow-all",
+            "MinTTL": 0,
+            "AllowedMethods": [
+              "HEAD",
+              "GET"
+            ],
+            "CachedMethods": [
+              "HEAD",
+              "GET"
+            ],
+            "ForwardedValues": {
+              "Cookies": {
+                "Forward": "none"
+              }
+            }
+          },
+          "Origins": [
+            {
+              "DomainName": "bootcamp-netremedies.s3.amazonaws.com",
+              "Id": "S3-bootcamp-netremedies",
+              "S3OriginConfig": {
+              }
+            }
+          ],
+          "Restrictions": {
+            "GeoRestriction": {
+              "RestrictionType": "none",
+              "Locations": [
+
+              ]
+            }
+          },
+          "ViewerCertificate": {
+            "CloudFrontDefaultCertificate": "true",
+            "MinimumProtocolVersion": "SSLv3"
+          }
+        }
+      }
+    },
+    "asgbootcampbastionasg": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "AvailabilityZones": [
+          "us-west-2a",
+          "us-west-2b"
+        ],
+        "Cooldown": "30",
+        "DesiredCapacity": "1",
+        "HealthCheckGracePeriod": "30",
+        "HealthCheckType": "EC2",
+        "MaxSize": "1",
+        "MinSize": "1",
+        "VPCZoneIdentifier": [
+          {
+            "Ref": "subnet6095be16"
+          },
+          {
+            "Ref": "subnet8f9180eb"
+          }
+        ],
+        "LaunchConfigurationName": {
+          "Ref": "lcbootcampbastionlc"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-bastion-asg",
+            "PropagateAtLaunch": true
+          }
+        ],
+        "TerminationPolicies": [
+          "Default"
+        ]
+      }
+    },
+    "asgbootcampwebagc3": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "AvailabilityZones": [
+          "us-west-2a",
+          "us-west-2b"
+        ],
+        "Cooldown": "300",
+        "DesiredCapacity": "2",
+        "HealthCheckGracePeriod": "30",
+        "HealthCheckType": "EC2",
+        "MaxSize": "2",
+        "MinSize": "2",
+        "VPCZoneIdentifier": [
+          {
+            "Ref": "subnet6095be16"
+          },
+          {
+            "Ref": "subnet8f9180eb"
+          }
+        ],
+        "LaunchConfigurationName": {
+          "Ref": "lcbootcampweblc3"
+        },
+        "LoadBalancerNames": [
+          {
+            "Ref": "elbbootcamplb"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-web-asg3",
+            "PropagateAtLaunch": true
+          }
+        ],
+        "TerminationPolicies": [
+          "Default"
+        ]
+      }
+    },
+    "lcbootcampbastionlc": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "AssociatePublicIpAddress": true,
+        "ImageId": "ami-b04e92d0",
+        "InstanceType": "t2.micro",
+        "KeyName": "bootcamp-bastion",
+        "SecurityGroups": [
+          {
+            "Ref": "sgbootcampbastion"
+          }
+        ],
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "VolumeSize": 8
+            }
+          }
+        ]
+      }
+    },
+    "lcbootcampweblc3": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "ImageId": "ami-b2da7cd2",
+        "InstanceType": "t2.micro",
+        "KeyName": "bootcamp-web",
+        "SecurityGroups": [
+          {
+            "Ref": "sgbootcampweb"
+          }
+        ],
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "VolumeSize": 8
+            }
+          }
+        ]
+      }
+    },
+    "instanceie3c73dbc": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "DisableApiTermination": "false",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "ImageId": "ami-b04e92d0",
+        "InstanceType": "t2.micro",
+        "KeyName": "bootcamp-web",
+        "Monitoring": "false",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-web-asg"
+          }
+        ]
+      }
+    },
+    "instancei99c43ec6": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "DisableApiTermination": "false",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "ImageId": "ami-b2da7cd2",
+        "InstanceType": "t2.micro",
+        "KeyName": "bootcamp-web",
+        "Monitoring": "false",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-web-asg"
+          }
+        ]
+      }
+    },
+    "instancei007b0f18": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "DisableApiTermination": "false",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "ImageId": "ami-b2da7cd2",
+        "InstanceType": "t2.micro",
+        "KeyName": "bootcamp-web",
+        "Monitoring": "false",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-web-asg"
+          }
+        ]
+      }
+    },
+    "instancei087a0e10": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "DisableApiTermination": "false",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "ImageId": "ami-b04e92d0",
+        "InstanceType": "t2.micro",
+        "KeyName": "bootcamp-web",
+        "Monitoring": "false",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-web-asg"
+          }
+        ]
+      }
+    },
+    "instancei327e0a2a": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "DisableApiTermination": "false",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "IamInstanceProfile": "arn:aws:iam::778310274487:instance-profile/bootcamp-web",
+        "ImageId": "ami-b04e92d0",
+        "InstanceType": "t2.micro",
+        "KeyName": "bootcamp-web",
+        "Monitoring": "false",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-ami"
+          }
+        ],
+        "NetworkInterfaces": [
+          {
+            "DeleteOnTermination": "true",
+            "Description": "Primary network interface",
+            "DeviceIndex": 0,
+            "SubnetId": {
+              "Ref": "subnet8f9180eb"
+            },
+            "PrivateIpAddresses": [
+              {
+                "PrivateIpAddress": "10.100.10.211",
+                "Primary": "true"
+              }
+            ],
+            "GroupSet": [
+              {
+                "Ref": "sgbootcampami"
+              }
+            ],
+            "AssociatePublicIpAddress": "true"
+          }
+        ]
+      }
+    },
+    "s3bootcampnetremedies": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "Private",
+        "VersioningConfiguration": {
+          "Status": "Suspended"
+        }
+      }
+    },
+    "sgbootcampami": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "bootcamp-ami",
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-ami"
+          }
+        ]
+      }
+    },
+    "sgbootcampbastion": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "bootcamp-bastion",
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-bastion"
+          }
+        ]
+      }
+    },
+    "sgbootcampdb": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "bootcamp-db",
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-db"
+          }
+        ]
+      }
+    },
+    "sgbootcamplb": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "bootcamp-lb",
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-lb"
+          }
+        ]
+      }
+    },
+    "sgbootcampweb": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "bootcamp-web",
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "bootcamp-web"
+          }
+        ]
+      }
+    },
+    "acl1": {
+      "Type": "AWS::EC2::NetworkAclEntry",
+      "Properties": {
+        "CidrBlock": "0.0.0.0/0",
+        "Egress": "true",
+        "Protocol": "-1",
+        "RuleAction": "allow",
+        "RuleNumber": "100",
+        "NetworkAclId": {
+          "Ref": "acl2d4f994a"
+        }
+      }
+    },
+    "acl2": {
+      "Type": "AWS::EC2::NetworkAclEntry",
+      "Properties": {
+        "CidrBlock": "0.0.0.0/0",
+        "Protocol": "-1",
+        "RuleAction": "allow",
+        "RuleNumber": "100",
+        "NetworkAclId": {
+          "Ref": "acl2d4f994a"
+        }
+      }
+    },
+    "subnetacl1": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "acl2d4f994a"
+        },
+        "SubnetId": {
+          "Ref": "subnet47908123"
+        }
+      }
+    },
+    "subnetacl2": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "acl2d4f994a"
+        },
+        "SubnetId": {
+          "Ref": "subnet8f9180eb"
+        }
+      }
+    },
+    "subnetacl3": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "acl2d4f994a"
+        },
+        "SubnetId": {
+          "Ref": "subnet64908100"
+        }
+      }
+    },
+    "subnetacl4": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "acl2d4f994a"
+        },
+        "SubnetId": {
+          "Ref": "subnet2f95be59"
+        }
+      }
+    },
+    "subnetacl5": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "acl2d4f994a"
+        },
+        "SubnetId": {
+          "Ref": "subnet4495be32"
+        }
+      }
+    },
+    "subnetacl6": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "acl2d4f994a"
+        },
+        "SubnetId": {
+          "Ref": "subnet6095be16"
+        }
+      }
+    },
+    "gw1": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc239d6844"
+        },
+        "InternetGatewayId": {
+          "Ref": "igw4bf5782f"
+        }
+      }
+    },
+    "subnetroute1": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "rtb6614a401"
+        },
+        "SubnetId": {
+          "Ref": "subnet8f9180eb"
+        }
+      }
+    },
+    "subnetroute2": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "rtb6614a401"
+        },
+        "SubnetId": {
+          "Ref": "subnet6095be16"
+        }
+      }
+    },
+    "subnetroute3": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "rtb7f14a418"
+        },
+        "SubnetId": {
+          "Ref": "subnet64908100"
+        }
+      }
+    },
+    "subnetroute4": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "rtb7f14a418"
+        },
+        "SubnetId": {
+          "Ref": "subnet47908123"
+        }
+      }
+    },
+    "subnetroute5": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "rtb7f14a418"
+        },
+        "SubnetId": {
+          "Ref": "subnet2f95be59"
+        }
+      }
+    },
+    "subnetroute6": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "rtb7f14a418"
+        },
+        "SubnetId": {
+          "Ref": "subnet4495be32"
+        }
+      }
+    },
+    "route1": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "RouteTableId": {
+          "Ref": "rtb6614a401"
+        },
+        "GatewayId": {
+          "Ref": "igw4bf5782f"
+        }
+      },
+      "DependsOn": "gw1"
+    },
+    "ingress1": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampami"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "80",
+        "ToPort": "80",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "ingress2": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampami"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "SourceSecurityGroupId": {
+          "Ref": "sgbootcampbastion"
+        },
+        "SourceSecurityGroupOwnerId": "778310274487"
+      }
+    },
+    "ingress3": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampami"
+        },
+        "IpProtocol": "icmp",
+        "FromPort": "8",
+        "ToPort": "-1",
+        "SourceSecurityGroupId": {
+          "Ref": "sgbootcampbastion"
+        },
+        "SourceSecurityGroupOwnerId": "778310274487"
+      }
+    },
+    "ingress4": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampbastion"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "ingress5": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampbastion"
+        },
+        "IpProtocol": "icmp",
+        "FromPort": "8",
+        "ToPort": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "ingress6": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampdb"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "SourceSecurityGroupId": {
+          "Ref": "sgbootcampbastion"
+        },
+        "SourceSecurityGroupOwnerId": "778310274487"
+      }
+    },
+    "ingress7": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampdb"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "3306",
+        "ToPort": "3306",
+        "SourceSecurityGroupId": {
+          "Ref": "sgbootcampbastion"
+        },
+        "SourceSecurityGroupOwnerId": "778310274487"
+      }
+    },
+    "ingress8": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampdb"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "3306",
+        "ToPort": "3306",
+        "SourceSecurityGroupId": {
+          "Ref": "sgbootcampweb"
+        },
+        "SourceSecurityGroupOwnerId": "778310274487"
+      }
+    },
+    "ingress9": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampdb"
+        },
+        "IpProtocol": "icmp",
+        "FromPort": "8",
+        "ToPort": "-1",
+        "SourceSecurityGroupId": {
+          "Ref": "sgbootcampbastion"
+        },
+        "SourceSecurityGroupOwnerId": "778310274487"
+      }
+    },
+    "ingress10": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcamplb"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "80",
+        "ToPort": "80",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "ingress11": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampweb"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "80",
+        "ToPort": "80",
+        "SourceSecurityGroupId": {
+          "Ref": "sgbootcampbastion"
+        },
+        "SourceSecurityGroupOwnerId": "778310274487"
+      }
+    },
+    "ingress12": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampweb"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "80",
+        "ToPort": "80",
+        "SourceSecurityGroupId": {
+          "Ref": "sgbootcamplb"
+        },
+        "SourceSecurityGroupOwnerId": "778310274487"
+      }
+    },
+    "ingress13": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampweb"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "SourceSecurityGroupId": {
+          "Ref": "sgbootcampbastion"
+        },
+        "SourceSecurityGroupOwnerId": "778310274487"
+      }
+    },
+    "ingress14": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampweb"
+        },
+        "IpProtocol": "icmp",
+        "FromPort": "8",
+        "ToPort": "-1",
+        "SourceSecurityGroupId": {
+          "Ref": "sgbootcampbastion"
+        },
+        "SourceSecurityGroupOwnerId": "778310274487"
+      }
+    },
+    "egress1": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampami"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "egress2": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampbastion"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "egress3": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampdb"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "egress4": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcamplb"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "egress5": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgbootcampweb"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    }
+  },
+  "Description": "bootcamp template"
+}
+
