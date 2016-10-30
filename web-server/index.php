@@ -25,7 +25,7 @@
       </div>
       <div class="row">
         <div class="col-xs-12">
-          <img class="img-responseive center-block" src="luigi.jpg">
+          <img class="img-responseive center-block" src="http://d2itenkrivvopv.cloudfront.net/luigi.jpg">
         </div>
       </div>
       <div>
